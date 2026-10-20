@@ -458,26 +458,36 @@ class CryptoCrops:
 
         # 4) plant
         if do_plant:
-            order = seeds or list(self.seeds().keys())
-            order = sorted(order, key=self.points_per_hour, reverse=True)
-            free = self.free_plots()
-            for plot in free:
-                if not order:
-                    break
-                seed = order[0]
-                if dry_run:
-                    res.planted.append({"dry": True, "plot": plot, "seed": seed})
+            base = sorted(seeds or list(self.seeds().keys()),
+                          key=self.points_per_hour, reverse=True)
+            exhausted: set[str] = set()
+            for plot in self.free_plots():
+                candidates = [s for s in base if s not in exhausted]
+                if not candidates:
+                    res.errors.append(f"plant p{plot}: tidak ada salinan seed tersisa")
                     continue
-                try:
-                    r = (self.plant(seed, plot) or {}).get("planted", {})
-                    res.planted.append(r)
-                except ApiError as exc:
-                    if "NO_AVAILABLE_SEED_COPY" in str(exc):
-                        # semua salinan seed ini sudah tertanam; coba seed berikutnya
-                        order = [s for s in order if s != seed]
-                        continue
-                    res.errors.append(f"plant {seed} p{plot}: {exc}")
-                time.sleep(0.6 + random.uniform(0, 0.5))
+                if dry_run:
+                    res.planted.append({"dry": True, "plot": plot,
+                                        "seed": candidates[0]})
+                    continue
+                placed = False
+                for seed in candidates:
+                    try:
+                        r = (self.plant(seed, plot) or {}).get("planted", {})
+                        res.planted.append(r)
+                        placed = True
+                        break
+                    except ApiError as exc:
+                        if "NO_AVAILABLE_SEED_COPY" in str(exc):
+                            # salinan seed ini habis -> coba seed berikutnya di plot yang sama
+                            exhausted.add(seed)
+                            continue
+                        res.errors.append(f"plant {seed} p{plot}: {exc}")
+                        break
+                    finally:
+                        time.sleep(0.6 + random.uniform(0, 0.5))
+                if not placed and not any(s not in exhausted for s in base):
+                    res.errors.append(f"plant p{plot}: semua seed habis salinan")
             if res.planted and not dry_run:
                 self.bootstrap()
         return res

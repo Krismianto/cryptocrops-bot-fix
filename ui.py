@@ -151,26 +151,43 @@ class Dashboard:
         rule = color("─" * size, GRAY)
 
         head: list[tuple[str, str]] = []  # mode: rule | raw | center | text
-        if self.figlet:
-            art = self.figlet.splitlines()
-            if self.align == "center":
-                head.extend(("raw", line) for line in center_block(art, size))
-            else:
-                head.extend(("text", line) for line in art)
-            head.append(("raw", ""))
-        if self.credit:
-            head.append(("center" if self.align == "center" else "text",
-                         color(self.credit, DIM)))
-        if self.subtitle:
-            head.append(("center" if self.align == "center" else "text",
-                         color(self.subtitle, DIM)))
-        head.append(("rule", rule))
-        if self.stats:
-            head.append(("text", self.stats))
-            head.append(("rule", rule))
-        for key, value in self.fields.items():
-            head.append(("text",
-                         f"  {color(f'{key.upper():<7}', BOLD)} {value}"))
+
+        def build(with_art: bool, with_credit: bool) -> list[tuple[str, str]]:
+            out: list[tuple[str, str]] = []
+            if with_art and self.figlet:
+                art = self.figlet.splitlines()
+                if self.align == "center":
+                    out.extend(("raw", line) for line in center_block(art, size))
+                else:
+                    out.extend(("text", line) for line in art)
+                out.append(("raw", ""))
+            if with_credit and self.credit:
+                out.append(("center" if self.align == "center" else "text",
+                            color(self.credit, DIM)))
+            if self.subtitle:
+                out.append(("center" if self.align == "center" else "text",
+                            color(self.subtitle, DIM)))
+            out.append(("rule", rule))
+            if self.stats:
+                out.append(("text", self.stats))
+                out.append(("rule", rule))
+            for key, value in self.fields.items():
+                out.append(("text",
+                            f"  {color(f'{key.upper():<7}', BOLD)} {value}"))
+            return out
+
+        # layar pendek: buang credit dulu, lalu banner, supaya frame tidak
+        # pernah menyentuh baris terakhir (penyebab layar scroll & teks hantu).
+        head = build(True, True)
+        if len(head) + 3 > height:
+            for art, credit in ((True, False), (False, False)):
+                trial = build(art, credit)
+                if len(trial) + 3 <= height:
+                    head = trial
+                    break
+        # masih terlalu tinggi: potong dari atas (art paling atas) sampai muat
+        while len(head) + 3 > height and len(head) > 4:
+            head.pop(0)
 
         # sisakan 2 baris (rule + ruang aman) supaya frame tidak pernah
         # menyentuh baris terakhir terminal - kalau menyentuh, layar scroll

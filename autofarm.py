@@ -103,14 +103,22 @@ def faucet_text(api: CryptoCrops) -> str:
 
 def farm_text(api: CryptoCrops) -> str:
     crops = api.farm.get("crops") or []
+    now = api.now_ms()
     ready = sum(1 for c in crops
-                if int(c.get("ready_at") or 0) <= api.now_ms())
+                if int(c.get("ready_at") or 0) <= now)
+    nxt = min((int(c.get("ready_at") or 0) for c in crops
+               if int(c.get("ready_at") or 0) > now), default=0)
     orders = [o for o in (api.farm.get("orders") or [])
               if o.get("status") == "active"]
     order_ready = sum(1 for o in orders if o.get("ready"))
-    return (f"plot {len(crops)}/{api.capacity()}"
+    text = (f"plot {len(crops)}/{api.capacity()}"
             f" · siap panen {ready}"
             f" · order siap {order_ready}/{len(orders)}")
+    if nxt:
+        text += f" · panen {ui.color(fmt_left(nxt - now), ui.YELLOW)}"
+    elif len(crops) < api.capacity():
+        text += " · " + ui.color("plot kosong", ui.RED)
+    return text
 
 
 def stats_text(api: CryptoCrops, label: str = "") -> str:
@@ -204,7 +212,7 @@ def run_cycle(api: CryptoCrops, ocr: Ocr, args, dash: ui.Dashboard,
 
 # -------------------------------------------------------------------- wait ---
 def wait_loop(api: CryptoCrops, dash: ui.Dashboard, seconds: float) -> None:
-    """Tunggu sambil menghidupkan countdown faucet di barisnya sendiri."""
+    """Tunggu sambil menghidupkan countdown faucet + panen di barisnya."""
     end = time.time() + max(0.0, seconds)
     last = ""
     last_print = 0.0
@@ -212,14 +220,18 @@ def wait_loop(api: CryptoCrops, dash: ui.Dashboard, seconds: float) -> None:
         left = end - time.time()
         if left <= 0:
             break
-        text = faucet_text(api)
+        faucet = faucet_text(api)
+        farm = farm_text(api)
+        text = f"{faucet}|{farm}"
         if text != last:
-            dash.set("faucet", text)
+            dash.set("faucet", faucet)
+            dash.set("farm", farm)
             dash.render()
             last = text
         if not dash.enabled and time.time() - last_print >= 60:
             last_print = time.time()
-            print(f"  {time.strftime('%H:%M:%S')}  {text}", flush=True)
+            print(f"  {time.strftime('%H:%M:%S')}  {farm} · faucet {faucet}",
+                  flush=True)
         time.sleep(min(1.0, max(0.05, left)))
 
 

@@ -234,7 +234,7 @@ autofarm · SawitDES
   SawitDES · coin 166 · xp 361 (lvl 2) · klaim 16
 ────────────────────────────────────────────────────────────
   FAUCET  cooldown 11:38 · berikutnya 22:37
-  FARM    plot 3/4 · siap panen 1 · order siap 0/8
+  FARM    plot 4/4 · siap panen 0 · order siap 0/8 · panen 02:14
 ────────────────────────────────────────────────────────────
   order Market Morning +6 coin +1 xp · panen 3 · jual 1 · tanam 2
 ```
@@ -244,6 +244,10 @@ autofarm · SawitDES
 Jeda antar putaran menyesuaikan: kalau ada crop matang dalam 40 detik, putaran
 berikutnya 42 detik kemudian. `--interval` hanya batas atas; faucet dicek ulang
 paling lambat 90 detik setelah waktunya.
+
+Baris `FAUCET` dan `FARM` sama-sama punya hitungan mundur (`cooldown 11:38`,
+`panen 02:14`). Kalau angkanya berjalan, loop-nya memang hidup — tidak ada
+aksi panen/jual/tanam hanya berarti belum ada yang bisa dikerjakan.
 
 ---
 
@@ -318,6 +322,9 @@ dan `__pycache__` — kredensial tidak pernah ikut ter-push.
 | Browser tidak jalan | venv Camoufox belum ada | `pip install camoufox[geoip] patchright` |
 | Banner jadi teks biasa | `pyfiglet` belum terpasang | `pip install pyfiglet` (opsional) |
 | Dashboard rusak saat `> log.txt` | output bukan TTY | otomatis nonaktif; tambahkan `--plain` |
+| Teks/garis dashboard tumpang tindih | jendela terminal terlalu pendek | banner otomatis diciutkan; perbesar jendela atau pakai `--plain` |
+| Plot kosong tidak kunjung ditanam | salinan seed itu sudah tertanam semua | otomatis fallback ke seed berikutnya; kalau habis semua muncul `plant p2: semua seed habis salinan` |
+| Farm kelihatan diam | crop masih tumbuh, tidak ada aksi | lihat hitungan `panen mm:ss` di baris FARM |
 
 ---
 
