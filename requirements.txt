@@ -1,0 +1,9 @@
+# python sistem (client, OCR checkpoint, login)
+requests>=2.31
+ddddocr>=1.5
+pillow>=10
+pyfiglet>=1.0
+
+# hanya untuk faucet (dipasang di venv Camoufox, lihat README)
+# camoufox[geoip]
+# patchright

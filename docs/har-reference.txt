@@ -1,0 +1,11 @@
+======================================================================
+POST https://cryptocrops.net/api/earn/faucet-challenge -> 200
+RESP: {"challenge":{"challenge_id":"afc7f6ea-f731-4e64-a5be-05f9920f8f41","expires_at":1792482349785},"captcha":{"provider":"turnstile","configured":true,"mandatory":true,"site_key":"0x4AAAAAAE8SO-yZVCky9wK7"},"verification":{"provider":"turnstile","configured":true,"mandatory":true,"site_key":"0x4AAAAAAE8SO-yZVCky9wK7","action":"faucet_claim","cdata":"78e0e6dedabe7344df9b4585690dc3e77c13726ed317b7a2782203b84111959c","ticket":"WyJ0dXJuc3RpbGUtdjEiLCJmYXVjZXRfY2xhaW0iLCI0YWI3MGI0NC05ZDZlLTQwMmEtYmM1NC02YzQ5NTNlNzhkMmMiLCJhZmM3ZjZlYS1mNzMxLTRlNjQtYTViZS0wNWY5OTIwZjhmNDEiLCIiLCJjcnlwdG9jcm9wcy5uZXQiLDE3OTI0ODIwNDk3ODUsImM3ODMxZjM1LWIyNDItNDZhMC1hYTQ3LTY3YTcyOTZjNTk4MCJd.78e0e6dedabe7344df9b4585690dc3e77c13726ed317b7a2782203b84111959c","expires_at":1792482349785}}
+======================================================================
+POST https://cryptocrops.net/api/earn/faucet -> 200
+  idempotency_key: len=36 head=35f87a0c-52fa-40ef-990e-98bafc0cd97f
+  faucet_challenge: len=36 head=afc7f6ea-f731-4e64-a5be-05f9920f8f41
+  captcha_token: len=837 head=1.8vGTfAqoiCs0c3DuR54XM8NyVPXwE72wO2y-QjH5WBxG3214M3gaKoS44zjyOBXmqhdV
+  captcha_ticket: len=309 head=WyJ0dXJuc3RpbGUtdjEiLCJmYXVjZXRfY2xhaW0iLCI0YWI3MGI0NC05ZDZlLTQwMmEtYm
+  HEADERS: {"origin": "https://cryptocrops.net", "referer": "https://cryptocrops.net/faucet/", "sec-fetch-mode": "cors", "sec-fetch-site": "same-origin", "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"}
+RESP: {"claimed":{"claim_id":"85f81fb7-03ba-4376-a425-f1791b00b038","base_coins":10,"league_bonus_bps":0,"bonus_coins":0,"total_coins":10,"farm_coin_balance":10,"farm_xp_earned":1,"sponsored_coins_toward_next_farm_xp":0,"farm_xp":16,"next_claim_at":1792482965480}}

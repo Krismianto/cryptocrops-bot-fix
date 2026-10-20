@@ -1,0 +1,19 @@
+# kredensial & data akun — jangan pernah di-commit
+accounts.json
+cookies*.txt
+captures/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# editor / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+*.log
