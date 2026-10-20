@@ -1,15 +1,20 @@
 # CryptoCrops Bot
 
-Toolkit terminal untuk mengelola beberapa akun [cryptocrops.net](https://cryptocrops.net) sekaligus:
-klaim faucet otomatis, kirim farm order, panen/jual/tanam, dan checkpoint OCR — semua dari satu perintah.
+<p align="center">
+  <img src="assets/banner.svg" alt="CryptoCrops Bot — created by Z3R0 0N3 ID | Airdrop 888" width="100%">
+</p>
 
-```
-created by Z3R0 0N3 ID | Airdrop 888
-```
+<p align="center">
+  <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white">
+  <img alt="Platform Windows" src="https://img.shields.io/badge/platform-Windows-0078D4?logo=windows&logoColor=white">
+  <img alt="Multi akun" src="https://img.shields.io/badge/multi--account-supported-2ea043">
+  <img alt="Use personal" src="https://img.shields.io/badge/use-personal-lightgrey">
+</p>
 
-![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
-![Platform](https://img.shields.io/badge/platform-Windows-0078D4?logo=windows&logoColor=white)
-![License](https://img.shields.io/badge/use-personal-lightgrey)
+<p align="center">
+  Toolkit terminal untuk mengelola beberapa akun <a href="https://cryptocrops.net">cryptocrops.net</a> sekaligus —<br>
+  klaim faucet otomatis, kirim farm order, panen/jual/tanam, dan checkpoint OCR dari satu perintah.
+</p>
 
 ---
 
@@ -209,7 +214,14 @@ Satu putaran per akun:
 
 Dashboard default (satu frame, tidak scroll):
 
-```
+<p align="center">
+  <img src="assets/dashboard.svg" alt="Dashboard autofarm.py — status, faucet, farm, dan log terakhir" width="100%">
+</p>
+
+<details>
+<summary>Versi teks (tanpa gambar)</summary>
+
+```text
   ___               _        ___
  / __|_ _ _  _ _ __| |_ ___ / __|_ _ ___ _ __ ___
 | (__| '_| || | '_ \  _/ _ \ (__| '_/ _ \ '_ (_-<
@@ -226,6 +238,8 @@ autofarm · SawitDES
 ────────────────────────────────────────────────────────────
   order Market Morning +6 coin +1 xp · panen 3 · jual 1 · tanam 2
 ```
+
+</details>
 
 Jeda antar putaran menyesuaikan: kalau ada crop matang dalam 40 detik, putaran
 berikutnya 42 detik kemudian. `--interval` hanya batas atas; faucet dicek ulang
@@ -285,6 +299,7 @@ cryptocrops-Bot/
 ├── cookies.txt          # akun aktif (auto-generated)
 ├── accounts.json        # database akun (jangan di-commit)
 ├── requirements.txt
+├── assets/              # banner + screenshot README (SVG)
 └── docs/                # catatan analisis endpoint & write-path
 ```
 

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-label="CryptoCrops Bot">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#07140d"/>
+      <stop offset="55%" stop-color="#0d2a1b"/>
+      <stop offset="100%" stop-color="#123a26"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7ee787"/>
+      <stop offset="100%" stop-color="#2ea043"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.82" cy="0.18" r="0.65">
+      <stop offset="0%" stop-color="#3fb950" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#3fb950" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#2ea043" stroke-opacity="0.08" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="320" fill="url(#bg)"/>
+  <rect width="1200" height="320" fill="url(#grid)"/>
+  <rect width="1200" height="320" fill="url(#glow)"/>
+
+  <!-- dekorasi daun -->
+  <g opacity="0.9" transform="translate(985 52) rotate(18)">
+    <path d="M0 0C60 -6 118 34 120 96c-58 6-116-34-120-96z" fill="url(#leaf)" opacity="0.22"/>
+    <path d="M6 6C62 30 104 68 114 90" fill="none" stroke="#7ee787" stroke-opacity="0.55" stroke-width="2"/>
+  </g>
+  <g opacity="0.75" transform="translate(1035 168) rotate(-24)">
+    <path d="M0 0C42 -4 84 26 86 68c-42 4-84-26-86-68z" fill="url(#leaf)" opacity="0.16"/>
+    <path d="M4 4C44 22 74 50 82 64" fill="none" stroke="#7ee787" stroke-opacity="0.4" stroke-width="2"/>
+  </g>
+
+  <!-- batang tanaman kiri -->
+  <g stroke="#3fb950" stroke-opacity="0.35" stroke-width="2" fill="none">
+    <path d="M70 300C70 240 92 196 132 168"/>
+    <path d="M70 300C62 250 40 214 18 194"/>
+  </g>
+  <circle cx="136" cy="164" r="6" fill="#7ee787" opacity="0.5"/>
+  <circle cx="14" cy="190" r="5" fill="#7ee787" opacity="0.35"/>
+
+  <!-- judul -->
+  <g font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+    <text x="72" y="96" font-size="18" letter-spacing="6" fill="#3fb950" font-weight="600">MULTI-ACCOUNT TOOLKIT</text>
+    <text x="70" y="178" font-size="86" font-weight="800" fill="#f0f6fc" letter-spacing="-2">CryptoCrops</text>
+  </g>
+  <text x="70" y="230" font-family="'Segoe UI', Arial, sans-serif" font-size="22" fill="#9fb8a6" letter-spacing="0.5">Terminal toolkit · multi-akun · faucet, order, dan auto farm</text>
+
+  <!-- pill -->
+  <g font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="600">
+    <rect x="70" y="254" width="112" height="34" rx="17" fill="#123a26" stroke="#2ea043" stroke-opacity="0.55"/>
+    <text x="126" y="276" fill="#7ee787" text-anchor="middle">AUTOFARM</text>
+    <rect x="194" y="254" width="92" height="34" rx="17" fill="#123a26" stroke="#2ea043" stroke-opacity="0.55"/>
+    <text x="240" y="276" fill="#7ee787" text-anchor="middle">FAUCET</text>
+    <rect x="298" y="254" width="94" height="34" rx="17" fill="#123a26" stroke="#2ea043" stroke-opacity="0.55"/>
+    <text x="345" y="276" fill="#7ee787" text-anchor="middle">ORDERS</text>
+    <rect x="404" y="254" width="118" height="34" rx="17" fill="#123a26" stroke="#2ea043" stroke-opacity="0.55"/>
+    <text x="463" y="276" fill="#7ee787" text-anchor="middle">CHECKPOINT</text>
+  </g>
+
+  <!-- footer credit -->
+  <text x="1128" y="288" text-anchor="end" font-family="'Segoe UI', Arial, sans-serif" font-size="16" fill="#8b949e">created by Z3R0 0N3 ID | Airdrop 888</text>
+  <rect x="0" y="316" width="1200" height="4" fill="url(#leaf)"/>
+</svg>
