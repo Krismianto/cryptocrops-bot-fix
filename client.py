@@ -148,6 +148,7 @@ class TickResult:
     sold: list[dict] = field(default_factory=list)
     planted: list[dict] = field(default_factory=list)
     orders: list[dict] = field(default_factory=list)
+    missions: list[dict] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
 
@@ -330,6 +331,32 @@ class CryptoCrops:
         return self._req("POST", "/api/orders/reroll", body,
                          allow=(200, 201, 400, 409))
 
+    # ---------------- missions ----------------
+    # POST /api/missions/claim {idempotency_key, mission_id} -> 200
+    #   {"claimed": {mission_id, period, pass_xp_earned, harvest_pass_xp, ...}}
+
+    def missions(self) -> list[dict]:
+        if not self.state:
+            self.bootstrap()
+        return _as_list(self.farm.get("missions"))
+
+    def missions_ready(self) -> list[dict]:
+        """Misi yang sudah `complete` tapi belum `claimed`."""
+        return [m for m in self.missions()
+                if m.get("complete") and not m.get("claimed")]
+
+    def claim_mission(self, mission_id: str) -> dict:
+        body = {"idempotency_key": str(uuid.uuid4()),
+                "mission_id": mission_id}
+        self.s.headers["referer"] = f"{BASE}/missions/"
+        try:
+            data = self._req("POST", "/api/missions/claim", body,
+                             allow=(200, 201, 400, 403, 409, 422, 429))
+        finally:
+            # balikkan referer supaya request farm berikutnya tetap sah
+            self.s.headers["referer"] = f"{BASE}/farm/"
+        return data if isinstance(data, dict) else {"raw": data}
+
     def faucet_challenge(self) -> dict:
         """POST /api/earn/faucet-challenge {} -> challenge_id + turnstile ticket."""
         data = self._req("POST", "/api/earn/faucet-challenge", {},
@@ -373,7 +400,8 @@ class CryptoCrops:
              do_harvest: bool = True, do_sell: bool = True,
              do_plant: bool = True, perfect_only: bool = False,
              keep_for_orders: bool = False, dry_run: bool = False,
-             do_orders: bool = True, reserve_orders: bool = True) -> TickResult:
+             do_orders: bool = True, reserve_orders: bool = True,
+             do_missions: bool = True) -> TickResult:
         res = TickResult()
         if not self.state:
             self.bootstrap()
@@ -489,6 +517,31 @@ class CryptoCrops:
                 if not placed and not any(s not in exhausted for s in base):
                     res.errors.append(f"plant p{plot}: semua seed habis salinan")
             if res.planted and not dry_run:
+                self.bootstrap()
+
+        # 5) claim misi yang sudah selesai (aksi di atas bisa menuntaskan misi)
+        if do_missions:
+            if (res.harvested or res.sold or res.orders or res.planted) \
+                    and not dry_run:
+                self.bootstrap()
+            for m in self.missions_ready():
+                mid = m.get("mission_id")
+                if not mid:
+                    continue
+                if dry_run:
+                    res.missions.append({"dry": True, "mission_id": mid,
+                                         "title": m.get("title"),
+                                         "pass_xp": m.get("pass_xp")})
+                    continue
+                try:
+                    r = (self.claim_mission(mid) or {}).get("claimed", {})
+                    res.missions.append({**r, "title": m.get("title")})
+                except ApiError as exc:
+                    if "ALREADY" in str(exc) or "CLAIMED" in str(exc):
+                        continue
+                    res.errors.append(f"mission {m.get('title') or mid}: {exc}")
+                time.sleep(0.5 + random.uniform(0, 0.4))
+            if res.missions and not dry_run:
                 self.bootstrap()
         return res
 
@@ -651,6 +704,41 @@ def cmd_report(api: CryptoCrops) -> None:
           f"next={prog.get('next_level_xp')}")
 
 
+def cmd_missions(api: CryptoCrops, claim: bool = False) -> None:
+    api.bootstrap()
+    ms = api.missions()
+    if not ms:
+        print("tidak ada misi di response bootstrap")
+        return
+    ready = [m for m in ms if m.get("complete") and not m.get("claimed")]
+    print(f"{'mission_id':<34}{'period':<8}{'progress':>10}  status")
+    for m in ms:
+        if m.get("claimed"):
+            state = "claimed"
+        elif m.get("complete"):
+            state = "READY"
+        else:
+            state = "progress"
+        print(f"{str(m.get('mission_id')):<34}{str(m.get('period')):<8}"
+              f"{str(m.get('progress')) + '/' + str(m.get('target')):>10}  {state}")
+    if not ready:
+        print(f"\ntidak ada misi siap diklaim ({len(ms)} misi dipantau)")
+        return
+    print(f"\n{len(ready)} misi siap diklaim")
+    if not claim:
+        print("jalankan: python client.py missions --claim")
+        return
+    for m in ready:
+        mid = m.get("mission_id")
+        try:
+            r = (api.claim_mission(mid) or {}).get("claimed", {})
+            fert = (f" +{r.get('fertilizer_rarity')}x{r.get('fertilizer_quantity')}"
+                    if r.get("fertilizer_rarity") else "")
+            print(f"  claimed {mid} +{r.get('pass_xp_earned')} pass xp{fert}")
+        except ApiError as exc:
+            print(f"  gagal {mid}: {exc}")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="CryptoCrops API client")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -687,6 +775,10 @@ def main() -> int:
     sub.add_parser("pools")
     sub.add_parser("guilds")
 
+    pm = sub.add_parser("missions")
+    pm.add_argument("--claim", action="store_true",
+                    help="klaim semua misi yang sudah selesai")
+
     args = ap.parse_args()
     api = CryptoCrops()
 
@@ -716,6 +808,8 @@ def main() -> int:
             print(json.dumps(api.pools(), indent=2))
         elif args.cmd == "guilds":
             print(json.dumps(api.guilds(), indent=2)[:4000])
+        elif args.cmd == "missions":
+            cmd_missions(api, claim=args.claim)
         elif args.cmd == "loop":
             seeds = [s.strip() for s in args.seeds.split(",") if s.strip()] or None
             api.loop(seeds, interval=args.interval, max_ticks=args.ticks,

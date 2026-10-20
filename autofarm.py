@@ -172,7 +172,8 @@ def run_cycle(api: CryptoCrops, ocr: Ocr, args, dash: ui.Dashboard,
 
     # 3) orders + farm
     t = api.tick(seeds=args.seeds, dry_run=args.dry_run,
-                 do_orders=not args.no_orders)
+                 do_orders=not args.no_orders,
+                 do_missions=not args.no_missions)
 
     events: list[str] = []
     for o in t.orders:
@@ -195,6 +196,16 @@ def run_cycle(api: CryptoCrops, ocr: Ocr, args, dash: ui.Dashboard,
         parts.append(f"tanam {len(t.planted)}")
     if parts:
         events.append(" · ".join(parts))
+
+    for m in t.missions:
+        if m.get("dry"):
+            events.append(f"misi (dry) {m.get('title')} "
+                          f"+{m.get('pass_xp')} pass xp")
+        else:
+            xp = m.get("pass_xp_earned")
+            fert = (f" +{m.get('fertilizer_rarity')}"
+                    if m.get("fertilizer_rarity") else "")
+            events.append(f"misi {m.get('title')} +{xp} pass xp{fert}")
 
     if events:
         dash.log(" · ".join(events), "ok")
@@ -259,6 +270,8 @@ def main() -> int:
     ap.add_argument("--no-faucet", action="store_true")
     ap.add_argument("--no-checkpoint", action="store_true")
     ap.add_argument("--no-orders", action="store_true")
+    ap.add_argument("--no-missions", action="store_true",
+                    help="lewati klaim misi harian/mingguan")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--headless", action="store_true")
     ap.add_argument("--plain", action="store_true", help="log polos tanpa dashboard")

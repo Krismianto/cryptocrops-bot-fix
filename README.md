@@ -26,7 +26,9 @@
 - [Kelola akun](#kelola-akun)
 - [Faucet](#faucet)
 - [Orders](#orders)
+- [Missions](#missions)
 - [Auto farm](#auto-farm)
+- [Estimasi pendapatan](#estimasi-pendapatan)
 - [Checkpoint](#checkpoint)
 - [Client API](#client-api)
 - [Struktur proyek](#struktur-proyek)
@@ -42,9 +44,10 @@
 | `login.py` | Tambah / impor / ekspor akun, tes cookie, tulis `cookies.txt` otomatis |
 | `faucet_run.py` | Klaim faucet lewat browser asli (Turnstile) dengan cooldown otomatis |
 | `orders.py` | Lihat order aktif, preview hadiah, fulfill, reroll |
-| `autofarm.py` | Satu loop: checkpoint → faucet → order → harvest/sell/plant |
+| `client.py` | Klien API mentah (`requests`) + `missions --claim` |
+| `autofarm.py` | Satu loop: checkpoint → faucet → order → harvest/sell/plant → klaim misi |
 | `checkpoint.py` | Selesaikan checkpoint anti-bot pakai OCR `ddddocr` |
-| `client.py` | Klien API mentah (`requests`) untuk script sendiri |
+| `earnings.py` | Hitung pendapatan HC/USD + berapa akun untuk target tertentu |
 | `ui.py` | Banner, warna, dan dashboard terminal satu frame |
 
 Multi-akun penuh: satu `accounts.json`, satu `cookies.txt` untuk akun aktif,
@@ -189,6 +192,40 @@ berarti kehilangan Harvest Points). Karena itu `autofarm.py`:
 
 ---
 
+## Missions
+
+Daily & Weekly Missions memberi Harvest Pass XP (kadang plus fertilizer) tanpa
+biaya coin. Daftar misi ikut di `/api/bootstrap` (`farm.missions`), klaimnya
+`POST /api/missions/claim`. Kontrak lengkap: [`docs/analysis-6-missions.md`](docs/analysis-6-missions.md).
+
+```powershell
+python client.py missions          # status semua misi
+python client.py missions --claim  # klaim yang complete & belum claimed
+```
+
+```
+mission_id                        period    progress  status
+daily-harvest-5                   daily        25/25  claimed
+daily-order-1                     daily          1/5  progress
+weekly-harvest-25                 weekly     125/125  READY
+weekly-sell-25                    weekly     125/125  READY
+...
+2 misi siap diklaim
+```
+
+`autofarm.py` mengklaim otomatis di akhir tiap putaran — setelah
+harvest/jual/order, karena aksi itu bisa menuntaskan misi baru. Output-nya
+menyatu di baris aktivitas:
+
+```
+misi Full Fields +150 pass xp · misi Produce Merchant +200 pass xp
+```
+
+Matikan dengan `--no-missions`. Misi offerwall / shortlink / PTC tidak
+diotomasi karena butuh interaksi manusia.
+
+---
+
 ## Auto farm
 
 ```powershell
@@ -198,6 +235,7 @@ python autofarm.py --account SawitDES         # akun tertentu
 python autofarm.py --all-accounts --headless  # semua akun bergiliran
 python autofarm.py --no-faucet                # farm + order saja
 python autofarm.py --no-orders                # farm saja
+python autofarm.py --no-missions              # lewati klaim misi
 python autofarm.py --plain                    # log polos
 python autofarm.py --log-history 3            # simpan 3 baris aktivitas
 python autofarm.py --align left               # rata kiri
@@ -211,6 +249,8 @@ Satu putaran per akun:
 3. **orders** — order `ready` dikirim ke `/api/orders/fulfill`
 4. **farm** — harvest crop matang → jual kelebihan → tanam ulang plot kosong
    (seed habis / `NO_AVAILABLE_SEED_COPY` dilewati, bukan error)
+5. **misi** — semua misi `complete` yang belum `claimed` diklaim
+   (`POST /api/missions/claim`), hasilnya masuk ke baris aktivitas
 
 Dashboard default (satu frame, tidak scroll):
 
@@ -248,6 +288,46 @@ paling lambat 90 detik setelah waktunya.
 Baris `FAUCET` dan `FARM` sama-sama punya hitungan mundur (`cooldown 11:38`,
 `panen 02:14`). Kalau angkanya berjalan, loop-nya memang hidup — tidak ada
 aksi panen/jual/tanam hanya berarti belum ada yang bisa dikerjakan.
+
+---
+
+## Estimasi pendapatan
+
+```powershell
+python earnings.py                          # target $10/hari
+python earnings.py --target 50 --unit week
+python earnings.py --unit once --fleet 20   # berapa hari untuk $10 sekali
+python earnings.py --uptime 1 --hours 24    # skenario ideal
+python earnings.py --coins 5000             # simulasi kalau saldo coin naik
+```
+
+Angka diambil dari server, bukan tebakan: seed terbaik yang **benar-benar bisa
+dipakai** (sudah di inventory atau harganya ≤ saldo coin), nilai poin dari
+`pool.estimatedHarvestCredits / total_points`, dan `creditsPerUsd` (10.000 HC =
+$1).
+
+Contoh nyata (4 plot, seed radish 144 pts/jam, uptime 85%):
+
+```
+per akun    : 11.750 pts/hari -> 3.713 HC -> $0.3713/hari
+per minggu  : $2.60 · per bulan $11.14
+
+target $10.00 per hari
+  linear    : 27 akun (dilusi diabaikan)
+  realistis : 34 akun (poin kamu ikut masuk pool)
+```
+
+Jawaban singkat "butuh berapa akun untuk $10":
+
+| Target | Akun (realistis) |
+|---|---|
+| $10 / hari | ±34 akun |
+| $10 / minggu | ±5 akun |
+| $10 sekali | 27 akun-hari (mis. 10 akun × 2,7 hari) |
+
+Asumsinya bot jalan terus dan seed murah selalu tersedia. Pool cuma $60 per
+siklus 6 jam dan dibagi semua pemain, jadi makin banyak akun nilai per poin
+turun — kolom "realistis" sudah menghitung itu.
 
 ---
 
@@ -298,6 +378,7 @@ cryptocrops-Bot/
 ├── camoufox_claim.py    # driver browser untuk klaim
 ├── orders.py            # order farm
 ├── autofarm.py          # loop utama + dashboard
+├── earnings.py          # kalkulator HC/USD + kebutuhan akun
 ├── checkpoint.py        # solver checkpoint (OCR)
 ├── ui.py                # banner, warna, dashboard
 ├── cookies.txt          # akun aktif (auto-generated)
