@@ -57,12 +57,12 @@ dan `autofarm.py --all-accounts` untuk menjalankan semuanya bergiliran.
 
 ## Instalasi
 
-```powershell
+```UCRT64
 git clone https://github.com/Krismianto/cryptocrops-bot-fix.git
 cd cryptocrops-Bot
 
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+source .venv/Scripts/activate
 
 pip install -r requirements.txt
 ```
