@@ -58,7 +58,7 @@ dan `autofarm.py --all-accounts` untuk menjalankan semuanya bergiliran.
 ## Instalasi
 
 ```powershell
-git clone https://github.com/airdrop-888/cryptocrops-Bot.git
+git clone https://github.com/Krismianto/cryptocrops-bot-fix.git
 cd cryptocrops-Bot
 
 python -m venv .venv
