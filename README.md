@@ -60,12 +60,11 @@ dan `autofarm.py --all-accounts` untuk menjalankan semuanya bergiliran.
 ```UCRT64
 git clone https://github.com/Krismianto/cryptocrops-bot-fix.git
 cd cryptocrops-Bot
-
-python -m venv .venv
-source .venv/Scripts/activate
-
+rm -rf venv
+py -3.11 -m venv venv
+source venv/Scripts/activate
+python --version
 pip install -r requirements.txt
-```
 
 Kebutuhan browser (Turnstile) dipasang sekali di venv terpisah oleh
 `faucet_run.py`; kalau ingin manual:
