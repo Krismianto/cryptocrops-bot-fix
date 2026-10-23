@@ -35,7 +35,7 @@ from page_solver import load_cookies  # noqa: E402
 
 PAGE = "https://cryptocrops.net/faucet/"
 HERE = os.path.dirname(os.path.abspath(__file__))
-TOKEN_SEL = "input[name=cf-turnstile-response]"
+TOKEN_SEL = "textarea[name='h-captcha-response'], textarea[name='cf-turnstile-response'], textarea[name='g-recaptcha-response']"
 STATUS_SEL = "[data-faucet-captcha-status]"
 FAUCET_STATUS_SEL = "[data-faucet-status]"
 BUTTON_SEL = "[data-claim-faucet]"
